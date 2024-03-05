@@ -1,24 +1,28 @@
-import React from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const About = () => {
-  let arr = [
-    {
-      id: 1,
-      name: "Hakim",
-    },
-    {
-      id: 2,
-      name: "Muhammad",
-    },
-    {
-      id: 3,
-      name: "Adham",
-    },
-  ];
+  const Api = "http://65.108.148.136:8080";
+  const ImageApi = "http://65.108.148.136:8080/images/";
+  const [data, setData] = useState([]);
+  async function getTodo() {
+    try {
+      const { data } = await axios.get(`${Api}/ToDo/get-to-dos`);
+      if (data.statusCode === 200) {
+        setData(data.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  useEffect(() => {
+    getTodo();
+  }, []);
+
   return (
     <div>
-      {arr.map((e) => {
+      {data.map((e) => {
         return (
           <div key={e.id}>
             <Link to={`/about/user/${e.id}`}>
