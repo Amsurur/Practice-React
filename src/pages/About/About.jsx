@@ -1,17 +1,29 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import FileBase64 from "react-file-base64";
 
 const About = () => {
-  const Api = "http://65.108.148.136:8080";
-  const ImageApi = "http://65.108.148.136:8080/images/";
+  const [image, setImage] = useState(null);
+  const [name, setName] = useState("");
   const [data, setData] = useState([]);
+  let api = "http://localhost:3000/data";
   async function getTodo() {
     try {
-      const { data } = await axios.get(`${Api}/ToDo/get-to-dos`);
-      if (data.statusCode === 200) {
-        setData(data.data);
-      }
+      let { data } = await axios.get(api);
+      setData(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  async function addUser() {
+    let user = {
+      id: Date.now(),
+      name: name,
+      img: image.base64,
+    };
+    try {
+      let { data } = await axios.post(api, user);
+      getTodo();
     } catch (error) {
       console.error(error);
     }
@@ -19,18 +31,25 @@ const About = () => {
   useEffect(() => {
     getTodo();
   }, []);
-
   return (
     <div>
-      {data.map((e) => {
-        return (
-          <div key={e.id}>
-            <Link to={`/about/user/${e.id}`}>
-              <p>{e.name}</p>
-            </Link>
-          </div>
-        );
-      })}
+      <div>
+        {data.map((e) => {
+          return (
+            <div key={e.id} className="flex ">
+              <img className="w-[100px]" src={e.img} alt="" />
+              <p>{e.name} </p>
+            </div>
+          );
+        })}
+      </div>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <FileBase64 onDone={(e) => setImage(e)} />
+      <button onClick={() => addUser()}>add</button>
     </div>
   );
 };
