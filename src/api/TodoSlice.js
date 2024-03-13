@@ -11,6 +11,25 @@ export const getTodo = createAsyncThunk("todo/getTodo", async () => {
     console.error(error);
   }
 });
+export const addTodo = createAsyncThunk(
+  "todo/addTodo",
+  async (obj, { dispatch }) => {
+    let formData = new FormData();
+    formData.append("Images", obj.img);
+    formData.append("Name", obj.name);
+    formData.append("Description", obj.desc);
+    try {
+      const { data } = await axios.post(
+        `${Api}/ToDo/add-to-do`,
+        formData,
+        "Content-type: multipart/form-data"
+      );
+      dispatch(getTodo());
+    } catch (error) {
+      console.error(error);
+    }
+  }
+);
 
 export const TodoSlice = createSlice({
   name: "todo",
@@ -24,20 +43,20 @@ export const TodoSlice = createSlice({
     onchange: (state, action) => {
       state.name = action.payload;
     },
-    addTodo: (state, action) => {
-      let obj = {
-        id: Date.now(),
-        name: state.name,
-        done: false,
-      };
-      if (state.name.trim().length === 0) {
-        toast.error("Epty");
-      } else {
-        state.data.push(obj);
-        state.name = "";
-        toast.success("done");
-      }
-    },
+    // addTodo: (state, action) => {
+    //   let obj = {
+    //     id: Date.now(),
+    //     name: state.name,
+    //     done: false,
+    //   };
+    //   if (state.name.trim().length === 0) {
+    //     toast.error("Epty");
+    //   } else {
+    //     state.data.push(obj);
+    //     state.name = "";
+    //     toast.success("done");
+    //   }
+    // },
     deleteTodo: (state, action) => {
       let id = action.payload;
       state.data = state.data.filter((e) => {
@@ -74,6 +93,15 @@ export const TodoSlice = createSlice({
     builder.addCase(getTodo.rejected, (state, action) => {
       state.loading = false;
     });
+    builder.addCase(addTodo.pending, (state, action) => {
+      state.loading = true;
+    });
+    builder.addCase(addTodo.fulfilled, (state, action) => {
+      state.loading = false;
+    });
+    builder.addCase(addTodo.rejected, (state, action) => {
+      state.loading = false;
+    });
   },
 });
 
@@ -83,7 +111,6 @@ export const {
   decrement,
   incrementByAmount,
   onchange,
-  addTodo,
   deleteTodo,
   completeTodo,
 } = TodoSlice.actions;
