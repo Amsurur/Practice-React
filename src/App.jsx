@@ -1,41 +1,44 @@
 import { useDispatch, useSelector } from "react-redux";
-import { store } from "./store/store";
 import {
   addTodo,
   completeTodo,
-  decrement,
   deleteTodo,
-  increment,
+  getTodo,
   onchange,
 } from "./api/TodoSlice";
-
+import { useEffect } from "react";
+import Skeleton from "@mui/material/Skeleton";
 const App = () => {
   const data = useSelector((state) => state.todo.data);
+  const loading = useSelector((state) => state.todo.loading);
   const name = useSelector((state) => state.todo.name);
   const dispatch = useDispatch();
+  const ImageApi = "http://65.108.148.136:8080/images/";
+
+  useEffect(() => {
+    dispatch(getTodo());
+  }, [dispatch]);
   return (
     <div>
-      <div className="border">
-        <input
-          value={name}
-          onChange={(e) => dispatch(onchange(e.target.value))}
-          type="text"
-          name=""
-          id=""
+      
+      {loading ? (
+        <Skeleton
+          sx={{ bgcolor: "grey.400" }}
+          variant="rectangular"
+          width={210}
+          height={118}
         />
-        <button onClick={() => dispatch(addTodo())}>Add</button>
-      </div>
+      ) : null}
       {data.map((e) => {
         return (
-          <div className="flex border my-1" key={e.id}>
+          <div key={e.id}>
+            <img
+              className="w-[10%]"
+              src={`${ImageApi}${e.images[0].imageName}`}
+              alt=""
+            />
             <p>{e.name}</p>
-            <p
-              onClick={() => dispatch(completeTodo(e.id))}
-              className="bg-[purple] text-white p-1 rounded mx-10"
-            >
-              {e.done ? "Done" : "notDone"}
-            </p>
-            <button onClick={() => dispatch(deleteTodo(e.id))}>delete</button>
+            <p>{e.description}</p>
           </div>
         );
       })}

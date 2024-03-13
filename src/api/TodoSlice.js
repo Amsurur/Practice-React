@@ -1,23 +1,24 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import axios from "axios";
 import toast from "react-hot-toast";
+const Api = "http://65.108.148.136:8080";
+
+export const getTodo = createAsyncThunk("todo/getTodo", async () => {
+  try {
+    const { data } = await axios.get(`${Api}/ToDo/get-to-dos`);
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+});
 
 export const TodoSlice = createSlice({
   name: "todo",
   initialState: {
     value: 0,
-    data: [
-      {
-        id: 1,
-        name: "get up",
-        done: false,
-      },
-      {
-        id: 2,
-        name: "sit down",
-        done: false,
-      },
-    ],
+    data: [],
     name: "",
+    loading: false,
   },
   reducers: {
     onchange: (state, action) => {
@@ -61,6 +62,18 @@ export const TodoSlice = createSlice({
     incrementByAmount: (state, action) => {
       state.value += action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(getTodo.pending, (state, action) => {
+      state.loading = true;
+    });
+    builder.addCase(getTodo.fulfilled, (state, action) => {
+      state.loading = false;
+      state.data = action.payload.data;
+    });
+    builder.addCase(getTodo.rejected, (state, action) => {
+      state.loading = false;
+    });
   },
 });
 
